@@ -41,11 +41,11 @@ jobs:
       - restore_cache:
           keys: [backend-test]
       - run: 
-        name: test backend
-        command: |
-          cd backend
-          npm install
-          npm run test
+          name: test backend
+          command: |
+            cd backend
+            npm install
+            npm run test
   frontend-test: 
     docker:
       - image: circleci/node:13.8.0
@@ -54,11 +54,11 @@ jobs:
       - restore_cache:
           keys: [frontend-test]
       - run: 
-        name: test backend
-        command: |
-          cd frontend
-          npm install
-          npm run test
+          name: test backend
+          command: |
+            cd frontend
+            npm install
+            npm run test
 
 workflows:
   default:
@@ -68,4 +68,4 @@ workflows:
       - frontend-test:
           requires: [frontend-build]
       - backend-test:
-          requires: [backend-test]
+          requires: [backend-build]
