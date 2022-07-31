@@ -5,18 +5,25 @@ orbs:
     slack: circleci/slack@4.10.1
 
 commands:
-  notify_slack_error:
+  trigger_slack_notification:
     steps:
       - slack/notify:
-          event: fail
-          template: basic_fail_1
-
-  notify_slack_pass:
-    steps:
-      - slack/notify:
-          event: pass
-          template: basic_success_1
-        
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": "*This is a text notification*",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
+          event: always    
 jobs:
   # notify:
   #   docker:
