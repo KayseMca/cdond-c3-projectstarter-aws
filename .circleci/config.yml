@@ -61,7 +61,7 @@ jobs:
             cd frontend
             npm install
             npm run build
-      - notify_slack_error
+      # - notify_slack_error
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
