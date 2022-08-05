@@ -159,9 +159,9 @@ workflows:
   default:
     jobs:
       - frontend-build
-          context: xoxb-3898607974896-3868361059926-OlDgfiIs4IbAiFVlOxND6dhf
+          context: slack-secrets
       - backend-build
-          context: xoxb-3898607974896-3868361059926-OlDgfiIs4IbAiFVlOxND6dhf
+          context: slack-secrets
       - frontend-test:
           requires: [frontend-build]
       - backend-test:
