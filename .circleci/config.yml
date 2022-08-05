@@ -29,6 +29,7 @@ commands:
   notify_slack_error:
     steps:
       - slack/notify:
+          channel: https://hooks.slack.com/services/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
           event: fail
           template: basic_fail_1
 
