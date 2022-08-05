@@ -155,6 +155,20 @@ jobs:
               --tags project=udapeople-frontend \
               --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" 
+      - run:
+          name: Add back-end ip to ansible inventory
+          command: |
+            backend_IP=$(aws ec2 describe-instances \
+              --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --output text)
+              echo $backend_IP >> .circleci/ansible/inventory.txt
+              cat .circleci/ansible/inventory.txt
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/.circleci/ansible/inventory.txt
+#       # Here's where you will add some code to rollback on failure 
 workflows:
   default:
     jobs:
