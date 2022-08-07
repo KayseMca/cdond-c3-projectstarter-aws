@@ -6,25 +6,6 @@ orbs:
 
 commands:
 
-  trigger_slack_notification:
-    steps:
-      - slack/notify:
-          custom: |
-            {
-              "blocks": [
-                {
-                  "type": "section",
-                  "fields": [
-                    {
-                      "type": "plain_text",
-                      "text": "*This is a text notification*",
-                      "emoji": true
-                    }
-                  ]
-                }
-              ]
-            }
-          event: always
 
   destroy-environment:
     steps:
@@ -32,9 +13,9 @@ commands:
           name: Destroy Environment
           when: on_fail
           command: |
-             aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}
-             aws s3 rm s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
-             aws cloudformation delete-stack --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
+             aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:5}
+             aws s3 rm s3://udapeople-${CIRCLE_WORKFLOW_ID:0:5} --recursive
+             aws cloudformation delete-stack --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:5}
   notify_slack_error:
     steps:
       - slack/notify:
@@ -71,7 +52,6 @@ jobs:
     docker: 
       - image: circleci/node:13.8.0
     steps:
-      - trigger_slack_notification
       - checkout
       - restore_cache:
           keys: [backend-build]
@@ -173,12 +153,43 @@ jobs:
               --output text >> .circleci/ansible/inventory.txt
               echo ${CIRCLE_WORKFLOW_ID:0:5}
               cat .circleci/ansible/inventory.txt
+              cat .circleci/ansible/inventory.txt
       - persist_to_workspace:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
 #       # Here's where you will add some code to rollback on failure 
       # - destroy-environment
+  
+  configure-infrastructure:
+    docker:
+      # Docker image here that supports Ansible
+      - image: python:3.7-alpine3.11
+    steps:
+      # Checkout code from git
+      - checkout
+      # Add ssh keys with fingerprint
+      - add_ssh_keys:
+          fingerprints: ["49:b2:26:92:55:38:57:4a:a1:1d:b9:32:9d:17:14:51"]
+      - run:
+          name: Install ssh
+          command: |
+              apk add --update openssh
+      - run:
+          name: Install Ansible
+          command: |
+            apk add --update ansible
+      - run:
+          name: Run Playbook and Configure server
+          command: |
+            cd .circleci/files
+            cat inventory.txt
+            ansible-playbook  -i inventory.txt  configure-server.yml
+      - destroy-environment
+      # attach workspace
+      - attach_workspace:
+          at: ~/
+#       # Here's where you will add some code to rollback on failure   
 workflows:
   default:
     jobs:
