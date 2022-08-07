@@ -35,6 +35,6 @@ Resources:
 Outputs:
   WorkflowID:
     Value: !Sub ${WorkflowID}
-    Description: http://udacity-dhjppmz437.s3-website-us-west-2.amazonaws.com
+    Description: http://udapeople-42424.s3-website-us-west-2.amazonaws.com
     Export:
       Name: WorkflowID
