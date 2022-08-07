@@ -215,6 +215,100 @@ jobs:
                   curl https://kvdb.io/DJpvi6gWw4Ukh2z98ugsLZ/migration_$\{CIRCLE_WORKFLOW_ID:0:5\}  -d '1'
               fi
 #      # Here's where you will add some code to rollback on failure 
+
+  deploy-frontend:
+    docker:
+      # Docker image here that supports AWS CLI
+      - image: amazon/aws-cli
+    steps:
+      # Checkout code from git
+      - checkout
+
+      - attach_workspace:
+          at: ~/
+
+      - run:
+          name: Install dependencies
+          command: |
+            # your code here
+            yum install -y tar gzip
+      - run:
+          name: Get backend url
+          command: |
+            # your code here
+            export BACKEND_IP=$(aws ec2 describe-instances \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:5}" \
+              --output text)
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo "API_URL = ${API_URL}"
+            echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
+            cat frontend/.env
+      - run:
+          name: Deploy frontend objects
+          command: |
+            # your code here
+            cd frontend
+            npm install
+            npm run build
+            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:5}".tar.gz dist
+            aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:5} --recursive
+
+      - destroy-environment
+      # revert migration fail
+  #       # Here's where you will add some code to rollback on failure   
+
+  deploy-backend:
+    docker:
+      # Docker image here that supports Ansible
+      - image: python:3.7-alpine3.11
+    steps:
+      # Checkout code from git
+      - checkout 
+      # Add ssh keys with fingerprint
+      - add_ssh_keys:
+          fingerprints: ["49:b2:26:92:55:38:57:4a:a1:1d:b9:32:9d:17:14:51"]
+      # attach workspace
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Install ssh
+          command: |
+              apk add --update openssh
+      - run:
+          name: Install Ansible and tar gzip
+          command: |
+            apk add --update ansible
+            yum install -y tar gzip
+      - run:
+          name: Deploy backend
+          command: |
+            cd backend
+            npm i
+            npm run build
+            # configure the environment
+            echo NODE_ENV=deployment >> .env 
+            echo VERSION=1 >> .env 
+            echo TYPEORM_ENTITIES=${TYPEORM_ENTITIES} >> .env 
+            echo TYPEORM_HOST=${TYPEORM_HOST} >> .env 
+            echo TYPEORM_CONNECTION=${TYPEORM_CONNECTION} >> .env  
+            echo TYPEORM_PORT=${TYPEORM_PORT} >> .env 
+            echo TYPEORM_USERNAME=${TYPEORM_USERNAME} >> .env 
+            echo TYPEORM_PASSWORD=${TYPEORM_PASSWORD} >> .env 
+            echo TYPEORM_DATABASE=${TYPEORM_DATABASE} >> .env 
+            echo TYPEORM_MIGRATIONS=${TYPEORM_MIGRATIONS} >> .env 
+            echo TYPEORM_MIGRATIONS_DIR=${TYPEORM_MIGRATIONS_DIR} >> .env 
+            cd ..
+            # Zip the directory
+            tar -C backend -czvf artifact.tar.gz .
+            cd .circleci/ansible
+            echo "Contents  of the inventory.txt file is -------"
+            cat inventory.txt
+            ansible-playbook -i inventory.txt deploy-backend.yml
+
+      - destroy-environment 
+      # Here's where you will add some code to rollback on failure 
+
 workflows:
   default:
     jobs:
@@ -240,3 +334,8 @@ workflows:
 
       - run-migrations:
           requires: [configure-infrastructure]
+
+      - deploy-frontend:
+          requires: [run-migrations]
+      - deploy-backend:
+          requires: [run-migrations]
