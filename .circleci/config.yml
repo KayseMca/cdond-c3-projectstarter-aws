@@ -211,8 +211,9 @@ jobs:
           command: |   
               if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
               then
+                  id=${CIRCLE_WORKFLOW_ID:0:5}
                   # If you are using kvdb.io, generate the bucket ID "DJpvi6gWw4Ukh2z98ugsLZ" in your local terminal first
-                  curl https://kvdb.io/DJpvi6gWw4Ukh2z98ugsLZ/migration_${CIRCLE_WORKFLOW_ID:0:5}  -d '1'
+                  curl https://kvdb.io/DJpvi6gWw4Ukh2z98ugsLZ/migration_${id}  -d '1'
               fi
 #      # Here's where you will add some code to rollback on failure 
 
@@ -227,7 +228,6 @@ jobs:
       - run:
           name: Install Node.js 13.8.0
           command: |
-            curl -fsSL https://deb.nodesource.com/setup_lts.x |  -E bash -
             yum install -y nodejs
             npm install --global n
             n 13.8.0
@@ -282,13 +282,18 @@ jobs:
       - run:
           name: Install ssh
           command: |
-              apk add --update openssh
+              sudo apt-get install openssh-server
+              sudo service ssh start
       - run:
           name: Install AWS CLI v2
           command: |
             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
             unzip awscliv2.zip
             sudo ./aws/install  
+      - run:
+          name: Install dependencies
+          command: |
+            sudo apt install -y tar gzip
       - run:
           name: Install Ansible
           command: |
