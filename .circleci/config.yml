@@ -226,6 +226,14 @@ jobs:
       # Checkout code from git
       - checkout
 
+      - attach_workspace:
+          at: /.circleci/ansible
+
+      - run:
+          name: Install dependencies
+          command: |
+            # your code here
+            yum install -y tar gzip
       - run:
           name: Install Node.js 13.8.0
           command: |
@@ -235,14 +243,7 @@ jobs:
             npm install --global n
             n 13.8.0
 
-      - run:
-          name: Install dependencies
-          command: |
-            # your code here
-            yum install -y tar gzip
       
-      - attach_workspace:
-          at: ~/
       - run:
           name: Get backend url
           command: |
@@ -272,10 +273,14 @@ jobs:
   deploy-backend:
     docker:
       # Docker image here that supports Ansible
-      - image: cimg/python:3.10
+      - image: python:3.7-alpine3.11
     steps:
       # Checkout code from git
       - checkout 
+      - run:
+          name: Install tar utility
+          command: |
+            apk add --update ansible gzip tar nodejs npm
       # Add ssh keys with fingerprint
       - add_ssh_keys:
           fingerprints: ["49:b2:26:92:55:38:57:4a:a1:1d:b9:32:9d:17:14:51"]
@@ -287,31 +292,43 @@ jobs:
       #     command: |
       #       sudo apt update
       #       sudo apt-get install openssh
-      - run:
-          name: Install AWS CLI v2
+      - run: 
+          name: Install ansible, awscli & node
           command: |
-            apt-get install sudo
+            # awscli
             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-            sudo unzip awscliv2.zip
-            sudo ./aws/install 
+            unzip awscliv2.zip
+            sudo ./aws/install
+
+            # ansible
+            sudo apt update
+            sudo apt install software-properties-common -y
+            sudo add-apt-repository --yes --update ppa:ansible/ansible
+            sudo apt install ansible -y
+
+          # nodejs
+          curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+          sudo apt install -y nodejs
+          sudo npm install --global n
+          sudo n 13.8.0 
       - run:
           name: Install dependencies
           command: |
             sudo apt install -y tar gzip
-      - run:
-          name: Install Ansible
-          command: |
-            python3 -m pip install --user ansible
+      # - run:
+      #     name: Install Ansible
+      #     command: |
+      #       python3 -m pip install --user ansible
         
-      - run:
-          name: Install Node.js 13.8.0
-          command: |
-            # Install Node.js LTS version as our base Node.js version
-            curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-            yum install -y nodejs
-            # Use n version manager to use Node.js v13.8.0
-            npm install --global n
-            n 13.8.0
+      # - run:
+      #     name: Install Node.js 13.8.0
+      #     command: |
+      #       # Install Node.js LTS version as our base Node.js version
+      #       curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+      #       yum install -y nodejs
+      #       # Use n version manager to use Node.js v13.8.0
+      #       npm install --global n
+      #       n 13.8.0
       - run:
           name: Deploy backend
           command: |
