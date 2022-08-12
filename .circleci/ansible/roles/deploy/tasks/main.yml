@@ -10,18 +10,20 @@
     # src: artifact.tar.gz
     dest: ~/udapeople
 
-- name: "install npm"
-  become: yes
-  apt:
-    name: npm
-    state: latest
+- name: "install nodejs and npm"
+    become: yes
+    apt:
+      name: ["npm"]
+      state: latest
+      update_cache: yes
 
 - name: "install pm2"
-  become: yes
-  npm:
-    name: pm2
-    global: yes
-    state: present
+    become: yes
+    npm:
+      name: pm2
+      global: yes
+      production: yes
+      state: present
 
 - name: "Install Dependencies and build app"
   shell: |
