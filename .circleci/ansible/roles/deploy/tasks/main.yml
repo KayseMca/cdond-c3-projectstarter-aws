@@ -7,6 +7,7 @@
 - name: "Extract artifact to EC2"
   unarchive:
     src: ~/project/artifact.tar.gz
+    # src: artifact.tar.gz
     dest: ~/udapeople
 
 - name: "Install Dependencies and build app"
