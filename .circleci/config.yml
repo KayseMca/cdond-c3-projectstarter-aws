@@ -8,14 +8,19 @@ commands:
 
 
   destroy-environment:
+    description: Destroy backend and frontend cloudformation stacks
+    parameters:
+      Workflow_ID:
+        Type: string
+        default: ${CIRCLE_WORKFLOW:0:5}
     steps:
       - run:
           name: Destroy Environment
           when: on_fail
           command: |
-             aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:5}
-             aws s3 rm s3://udapeople-${CIRCLE_WORKFLOW_ID:0:5} --recursive
-             aws cloudformation delete-stack --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:5}
+             aws cloudformation delete-stack --stack-name udapeople-backend-<< parameters.WORKFLOW_ID >>
+             aws s3 rm s3://udapeople-<< parameters.WORKFLOW_ID >> --recursive
+             aws cloudformation delete-stack --stack-name udapeople-frontend-<< parameters.WORKFLOW_ID >>
   notify_slack_error:
     steps:
       - slack/notify:
@@ -295,6 +300,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
+            apk add --update openssh
             apk add --update ansible
             apk add --update nodejs
             apk add --update npm
@@ -359,6 +365,7 @@ jobs:
             cd ..
             # Zip the directory
             tar -C backend -czvf artifact.tar.gz .
+            # cp backend/artifact.tar.gz .circle/
             cd .circleci/ansible
             echo "Contents  of the inventory.txt file is -------"
             cat inventory.txt
