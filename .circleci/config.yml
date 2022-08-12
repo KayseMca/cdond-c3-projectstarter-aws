@@ -244,8 +244,9 @@ jobs:
           name: Install Node.js 13.8.0
           command: |
             yum install -y sudo
-            curl -sL https://deb.nodesource.com/setup_4.x | sudo -E bash -
-            yum  install -y nodejs
+            sudo curl -sL https://rpm.nodesource.com/setup_10.x | sudo bash -
+            # curl -sL https://deb.nodesource.com/setup_4.x | sudo -E bash -
+            sudo yum  install -y nodejs
             npm install --global -y  n
             n 13.8.0
 
@@ -366,7 +367,7 @@ jobs:
             cd ..
             # Zip the directory
             tar -C backend -czvf artifact.tar.gz .
-            # cp backend/artifact.tar.gz .circle/
+            cp backend/artifact.tar.gz .circle/ansible/roles/deploy/files
             cd .circleci/ansible
             echo "Contents  of the inventory.txt file is -------"
             cat inventory.txt
