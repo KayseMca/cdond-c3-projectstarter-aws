@@ -17,6 +17,14 @@
     state: latest
     update_cache: yes
 
+ name: "Install Node.js"
+  become: yes
+  shell: |
+    curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+    sudo apt-get install -y nodejs
+    sudo npm install -g n
+    sudo n 13.8.0
+
 - name: "install pm2"
   become: yes
   npm:
@@ -35,4 +43,4 @@
   shell: |
     cd ~/udapeople
     pm2 stop default
-    pm2 start npm -- start
+    sudo pm2 start npm -- start
