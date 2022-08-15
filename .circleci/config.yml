@@ -448,11 +448,11 @@ jobs:
           name: Frontend smoke test.
           command: |
             # your code here
-            WEBSITE_URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:5}.s3-website-${AWS-DEFAULT_REGION}.amazonaws.com"
+            WEBSITE_URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:5}.s3-website-${AWS_DEFAULT_REGION}.amazonaws.com"
             echo ${WEBSITE_URL}
             if curl -s ${WEBSITE_URL} | grep "Welcome"
             then
-              return 1
+              return 0
             else
               return 1
             fi
