@@ -478,4 +478,6 @@ workflows:
           requires: [run-migrations]
       - deploy-frontend:
           requires: [run-migrations]
+      - smoke-test: 
+          requires: [deploy-frontend, deploy-backend]
       
