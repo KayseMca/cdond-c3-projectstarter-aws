@@ -44,6 +44,16 @@
 
 - name: "Run pm2"
   shell: |
-    cd ~/udapeople
+    cd ~/udapeople/dist
     pm2 stop default
-    sudo pm2 start npm -- start
+    pm2 start main.js
+  register: excute
+
+- name: "message"
+  debug: 
+    msg: "{{excute.stdout_lines}}"
+
+- name: "configure pm2 to start server"
+  become: true 
+  shell: |
+    env PATH=$PATH:usr/local/bin pm2 startup systemd -u ubuntu --hp /home/ubuntu  
