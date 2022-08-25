@@ -1,0 +1,27 @@
+receivers:
+- name: alert-me
+  slack_configs:
+    - channel: '#circlci-deploying-to-aws'
+      send resolved: true
+      icon_url: https://avatars3.githubusercontent.com/u/3388462
+      title: |
+        [{{ .Status | toUpper }}{{ if eq .Status "firing" }} :{{ .Alerts.Firing | len }}{{ end } } {{ .CommonLabels.alertname }} for {{ .CommonLabels.job }}
+        {{ if gt (len .CommonLabels) (len .GroupLabels) -}}
+          {{" "}}(
+          {{- with .Commonlabels.Remove .GroupLabels.Names }}
+            {{- range $index, $label := .SortedPairs -}}
+              {{ if $index }}, {{ end }}
+              {{- $label.Name }}="{{$label.Value -}}"
+            {{- end }}
+          {{-end -}}
+          )
+        {{- end }}
+      text: >-
+        {{ range .Alerts -}}
+        *Alert:* {{ .Annotations.title }}{{ if .Labels.severity }} {{ .Labels.severity }} {{ end }}
+        *Description:* {{ .Annotations.description }}
+        *Details:*
+          {{ range .Labels.SortedPairs }}  *{ { .Name } }:* `{{ .Value }}`
+          {{ end }}        
+
+        {{ end }}
