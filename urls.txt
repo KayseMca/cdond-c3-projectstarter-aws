@@ -1,4 +1,4 @@
-1. GIT HUB REPO:
+1. Github REPO:
 https://github.com/KayseMca/cdond-c3-projectstarter-aws
 
 2. URL02 - S3 BUCKET
@@ -12,6 +12,3 @@ http://52.42.69.111:3030/api/status
 
 5. URL05 - Promethous
 http://ec2-34-222-226-52.us-west-2.compute.amazonaws.com:9090/graph
-
-
-
